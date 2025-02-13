@@ -2,72 +2,80 @@ grammar uk.ac.kcl.inf.mdd2.Turtles with org.eclipse.xtext.common.Terminals
 
 generate turtles "http://www.ac.uk/kcl/inf/mdd2/Turtles"
 
+
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 TurtleProgram:
-statements += Statement*
+	statements += Statement*
 ;
-
+	
 Statement:
-MoveStatement |
-TurnStatement |
-LoopStatement |
-VariableDeclaration
+	MoveStatement |
+	TurnStatement |
+	LoopStatement |
+	VariableDeclaration
 ;
 
 VariableDeclaration:
-"var" name=ID "=" value=Expression
+	"var" name=ID "=" value=INT
 ;
 
 LoopStatement:
-count = Expression "times" "do"
-statements += Statement+
-"end"
+	count = Addition "times" "do"
+	  statements += Statement+
+	"end"
 ;
 
 MoveStatement:
-command = MoveCommand "(" steps = Expression ")"
+	command = MoveCommand "(" steps = Addition ")"
 ;
 
 enum MoveCommand:
-forward | backward
+	forward | backward
 ;
 
 TurnStatement:
-"turn" command = TurnCommand "by" degrees = Expression "degrees"
+	"turn" command = TurnCommand "by" degrees = REAL "degrees"
 ;
 
 enum TurnCommand:
-left | right
+	left | right
 ;
 
-Expression:
-PlusExpression
+
+
+Addition returns IntExpression:
+	Multiplication ({Addition.left = current} '+'right+= Multiplication)*
 ;
 
-PlusExpression returns Expression:
-PrimaryExpression ({PlusExpression.left=current} "+" right=PrimaryExpression)*
+Multiplication returns IntExpression:
+	PrimaryExpression ({Multiplicatin.left = current}'*'  right+= PrimaryExpression)*
+	
 ;
 
-PrimaryExpression returns Expression:
-IntConstant |
-RealConstant |
-VariableReference |
-"(" Expression ")"
+PrimaryExpression returns IntExpression:
+	IntLiteral |
+	VariableReference |
+	'(' Addition ')'
+	
 ;
 
-IntConstant:
-value=INT
-;
-
-RealConstant:
-value=REAL
+IntLiteral:
+	val = INT 
 ;
 
 VariableReference:
-variable=[VariableDeclaration]
+	var = [VariableDeclaration]
 ;
 
 REAL returns ecore::EFloat hidden():
-INT? "." INT
-;
+	INT? "." INT
+; 
+
+
+
+
+
+
+
+
